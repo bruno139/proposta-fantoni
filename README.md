@@ -15,3 +15,11 @@ e abra http://localhost:3002.
 ## Onde mudar preços e textos
 
 Tudo fica em `public/dados.js`: plano base, módulos, taxas de implantação, serviços extras e a frase do acerto mensal (dia 10).
+
+## Arquivo único para mandar por WhatsApp/e-mail
+
+`Proposta Fantoni PDV.html` é a página inteira em um arquivo só: abre com dois cliques, sem Node. Depois de mudar algo em `public/`, gere de novo com:
+
+```
+node gerar-arquivo.js
+```
