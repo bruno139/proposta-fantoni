@@ -32,6 +32,7 @@ const GRUPOS = [
 const TODOS = Object.fromEntries(GRUPOS.flatMap((g) => g.itens.map((i) => [i.id, { ...i, mensal: g.mensal }])));
 
 // --- estado: o que está escolhido (id -> quantidade); começa com o plano base e os itens obrigatórios ---
+let regime = P.base.regimes[0];
 const escolha = Object.fromEntries(Object.values(TODOS).filter((i) => i.obrigatorio).map((i) => [i.id, 1]));
 
 // --- montagem ---
@@ -52,10 +53,10 @@ let html = `
       <div class="acerto"><span class="dia"><small>dia</small>10</span><span><b>Acerto mensal</b>${P.acerto}</span></div>
     </div>
     <div class="preco-base">
-      <span class="oferta">${b.oferta}</span>
-      <s>de ${real(b.precoDe)}/mês</s>
-      <span class="por">por</span>
-      <b>${real(b.preco)}</b><small>por mês</small>
+      <span class="oferta">Para iniciar só com o sistema</span>
+      <div class="regimes" role="radiogroup" aria-label="Regime da empresa">
+        ${b.regimes.map((r) => `<button class="regime" role="radio" data-regime="${r.id}"><span>${r.nome}</span><b>${real(r.preco)}</b><small>por mês</small></button>`).join("")}
+      </div>
     </div>
   </div>
 </section>`;
@@ -91,10 +92,12 @@ function alternar(id, delta) {
 }
 
 $("#conteudo").addEventListener("click", (e) => {
+  const bt = e.target.closest(".regime");
+  if (bt) { regime = b.regimes.find((r) => r.id === bt.dataset.regime); atualizar(); return; }
   const card = e.target.closest(".item");
   if (!card) return;
-  const bt = e.target.closest(".qtd button");
-  alternar(card.dataset.id, bt ? Number(bt.dataset.d) : undefined);
+  const mais = e.target.closest(".qtd button");
+  alternar(card.dataset.id, mais ? Number(mais.dataset.d) : undefined);
 });
 $("#conteudo").addEventListener("keydown", (e) => {
   if ((e.key === "Enter" || e.key === " ") && e.target.classList.contains("item")) { e.preventDefault(); alternar(e.target.dataset.id); }
@@ -117,8 +120,9 @@ function animarNumero(el, chave, alvo) {
 }
 
 function atualizar() {
-  let mensal = b.preco, unico = 0;
-  const linhas = { m: [`<li><span>${b.nome}</span><span>${real(b.preco)}</span></li>`], u: [] };
+  document.querySelectorAll(".regime").forEach((el) => el.setAttribute("aria-checked", el.dataset.regime === regime.id));
+  let mensal = regime.preco, unico = 0;
+  const linhas = { m: [`<li><span>${b.nome} · ${regime.nome}</span><span>${real(regime.preco)}</span></li>`], u: [] };
   document.querySelectorAll(".item").forEach((card) => {
     const id = card.dataset.id, i = TODOS[id], q = escolha[id] || 0;
     card.classList.toggle("on", q > 0);

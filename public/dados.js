@@ -11,9 +11,11 @@ window.PROPOSTA = {
 
   base: {
     nome: "Sistema PDV (Base)",
-    precoDe: 99, // preço cheio (o do PDF), mostrado riscado
-    preco: 89, // preço para iniciar só com o sistema, igual ao site
-    oferta: "Para iniciar só com o sistema",
+    // preço mensal para iniciar só com o sistema, conforme o regime da empresa (o primeiro é o que abre marcado)
+    regimes: [
+      { id: "mei", nome: "MEI", preco: 89 },
+      { id: "simples", nome: "Simples Nacional", preco: 99 },
+    ],
     texto:
       "Core do sistema que abrange frente de caixa, controle de estoque básico, fechamento de caixa e relatórios essenciais. " +
       "Este valor sustenta as atualizações contínuas de segurança e melhorias de performance.",

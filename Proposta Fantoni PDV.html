@@ -94,10 +94,14 @@ section:first-child .titulo h2, section:first-child .titulo span { color: #fff; 
 :root[data-tema="escuro"] .acerto b { color: #fde68a; }
 .preco-base { text-align: right; display: flex; flex-direction: column; align-items: flex-end; }
 .preco-base .oferta { display: inline-block; font-size: 12px; font-weight: 600; background: var(--ok); color: #fff; padding: 4px 12px; border-radius: 99px; margin-bottom: 10px; box-shadow: 0 4px 14px rgba(34,197,94,.35); }
-.preco-base s { color: var(--muted); font-size: 16px; font-weight: 500; text-decoration-color: #ef4444; text-decoration-thickness: 2px; }
-.preco-base .por { font-size: 12px; color: var(--muted); margin: 2px 0; }
-.preco-base b { display: block; font-family: var(--titulo); font-size: 42px; font-weight: 700; letter-spacing: -1px; line-height: 1; }
-.preco-base small { color: var(--muted); }
+.regimes { display: flex; flex-direction: column; gap: 8px; width: 210px; }
+.regime { border: 2px solid var(--line); background: var(--surface); border-radius: 14px; padding: 10px 14px; display: grid; grid-template-columns: 1fr auto; align-items: baseline; text-align: left; transition: border-color .2s, background .2s; }
+.regime span { font-weight: 600; font-size: 13.5px; grid-column: 1 / -1; color: var(--muted); }
+.regime b { font-family: var(--titulo); font-size: 30px; font-weight: 700; letter-spacing: -.6px; line-height: 1.1; }
+.regime small { color: var(--muted); font-size: 12px; text-align: right; }
+.regime:hover { border-color: var(--cor2); }
+.regime[aria-checked="true"] { border-color: var(--cor); background: var(--cor-suave); }
+.regime[aria-checked="true"] span { color: var(--cor); }
 
 /* cards de itens */
 .itens { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
@@ -169,7 +173,11 @@ section:first-child .titulo h2, section:first-child .titulo span { color: #fff; 
   .itens { grid-template-columns: 1fr; }
   .base { grid-template-columns: 1fr; padding: 20px; }
   .base ul { grid-template-columns: 1fr; }
-  .preco-base { text-align: left; align-items: flex-start; }
+  .preco-base { text-align: left; align-items: stretch; }
+  .preco-base .oferta { align-self: flex-start; }
+  .regimes { width: auto; flex-direction: row; }
+  .regime { flex: 1; }
+  .regime b { font-size: 24px; }
 }
 @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } .surge { opacity: 1; transform: none; } }
 
@@ -247,9 +255,11 @@ window.PROPOSTA = {
 
   base: {
     nome: "Sistema PDV (Base)",
-    precoDe: 99, // preço cheio (o do PDF), mostrado riscado
-    preco: 89, // preço para iniciar só com o sistema, igual ao site
-    oferta: "Para iniciar só com o sistema",
+    // preço mensal para iniciar só com o sistema, conforme o regime da empresa (o primeiro é o que abre marcado)
+    regimes: [
+      { id: "mei", nome: "MEI", preco: 89 },
+      { id: "simples", nome: "Simples Nacional", preco: 99 },
+    ],
     texto:
       "Core do sistema que abrange frente de caixa, controle de estoque básico, fechamento de caixa e relatórios essenciais. " +
       "Este valor sustenta as atualizações contínuas de segurança e melhorias de performance.",
@@ -316,6 +326,7 @@ const GRUPOS = [
 const TODOS = Object.fromEntries(GRUPOS.flatMap((g) => g.itens.map((i) => [i.id, { ...i, mensal: g.mensal }])));
 
 // --- estado: o que está escolhido (id -> quantidade); começa com o plano base e os itens obrigatórios ---
+let regime = P.base.regimes[0];
 const escolha = Object.fromEntries(Object.values(TODOS).filter((i) => i.obrigatorio).map((i) => [i.id, 1]));
 
 // --- montagem ---
@@ -336,10 +347,10 @@ let html = `
       <div class="acerto"><span class="dia"><small>dia</small>10</span><span><b>Acerto mensal</b>${P.acerto}</span></div>
     </div>
     <div class="preco-base">
-      <span class="oferta">${b.oferta}</span>
-      <s>de ${real(b.precoDe)}/mês</s>
-      <span class="por">por</span>
-      <b>${real(b.preco)}</b><small>por mês</small>
+      <span class="oferta">Para iniciar só com o sistema</span>
+      <div class="regimes" role="radiogroup" aria-label="Regime da empresa">
+        ${b.regimes.map((r) => `<button class="regime" role="radio" data-regime="${r.id}"><span>${r.nome}</span><b>${real(r.preco)}</b><small>por mês</small></button>`).join("")}
+      </div>
     </div>
   </div>
 </section>`;
@@ -375,10 +386,12 @@ function alternar(id, delta) {
 }
 
 $("#conteudo").addEventListener("click", (e) => {
+  const bt = e.target.closest(".regime");
+  if (bt) { regime = b.regimes.find((r) => r.id === bt.dataset.regime); atualizar(); return; }
   const card = e.target.closest(".item");
   if (!card) return;
-  const bt = e.target.closest(".qtd button");
-  alternar(card.dataset.id, bt ? Number(bt.dataset.d) : undefined);
+  const mais = e.target.closest(".qtd button");
+  alternar(card.dataset.id, mais ? Number(mais.dataset.d) : undefined);
 });
 $("#conteudo").addEventListener("keydown", (e) => {
   if ((e.key === "Enter" || e.key === " ") && e.target.classList.contains("item")) { e.preventDefault(); alternar(e.target.dataset.id); }
@@ -401,8 +414,9 @@ function animarNumero(el, chave, alvo) {
 }
 
 function atualizar() {
-  let mensal = b.preco, unico = 0;
-  const linhas = { m: [`<li><span>${b.nome}</span><span>${real(b.preco)}</span></li>`], u: [] };
+  document.querySelectorAll(".regime").forEach((el) => el.setAttribute("aria-checked", el.dataset.regime === regime.id));
+  let mensal = regime.preco, unico = 0;
+  const linhas = { m: [`<li><span>${b.nome} · ${regime.nome}</span><span>${real(regime.preco)}</span></li>`], u: [] };
   document.querySelectorAll(".item").forEach((card) => {
     const id = card.dataset.id, i = TODOS[id], q = escolha[id] || 0;
     card.classList.toggle("on", q > 0);
