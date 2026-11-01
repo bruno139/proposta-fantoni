@@ -11,7 +11,9 @@ window.PROPOSTA = {
 
   base: {
     nome: "Sistema PDV (Base)",
-    preco: 89, // o PDF diz R$ 99; o usuário pediu R$ 89, igual ao site
+    precoDe: 99, // preço cheio (o do PDF), mostrado riscado
+    preco: 89, // preço para iniciar só com o sistema, igual ao site
+    oferta: "Para iniciar só com o sistema",
     texto:
       "Core do sistema que abrange frente de caixa, controle de estoque básico, fechamento de caixa e relatórios essenciais. " +
       "Este valor sustenta as atualizações contínuas de segurança e melhorias de performance.",
@@ -38,7 +40,7 @@ window.PROPOSTA = {
   ],
 
   extras: [
-    { id: "treino", nome: "Implantação e Treinamento", preco: 120, icone: "video", texto: "Implantação e Treinamento do Sistema, até 2 horas de configuração e treinamento guiado em ligação via Meet." },
+    { id: "treino", nome: "Implantação e Treinamento", preco: 120, obrigatorio: true, icone: "video", texto: "Implantação e Treinamento do Sistema, até 2 horas de configuração e treinamento guiado em ligação via Meet." },
     { id: "horas", nome: "Cadastro de Produtos / Artes / Ajustes Específicos", preco: 30, icone: "pincel", tipo: "qtd", unidade: "hora", texto: "Horas técnicas dedicadas à personalização da base de dados do cliente ou criação de materiais visuais integrados." },
   ],
 };

@@ -18,6 +18,7 @@ const ICONES = {
   video: '<rect x="2" y="6" width="14" height="12" rx="2"/><path d="m16 10 6-3v10l-6-3"/>',
   pincel: '<path d="M18.4 2.6a2 2 0 0 1 3 3L12 15l-4-4z"/><path d="M8 11c-2 0-4 1.5-4 4 0 1.5-1 2.5-2 3 4 1.5 9 1 10-3z"/>',
   ok: '<path d="M20 6 9 17l-5-5"/>',
+  cadeado: '<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
   relogio: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
 };
 const svg = (n, t = 22) => `<svg width="${t}" height="${t}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ICONES[n]}</svg>`;
@@ -30,8 +31,8 @@ const GRUPOS = [
 ];
 const TODOS = Object.fromEntries(GRUPOS.flatMap((g) => g.itens.map((i) => [i.id, { ...i, mensal: g.mensal }])));
 
-// --- estado: o que está escolhido (id -> quantidade); sempre começa só com o plano base ---
-const escolha = {};
+// --- estado: o que está escolhido (id -> quantidade); começa com o plano base e os itens obrigatórios ---
+const escolha = Object.fromEntries(Object.values(TODOS).filter((i) => i.obrigatorio).map((i) => [i.id, 1]));
 
 // --- montagem ---
 $("#data").textContent = "Valores atualizados em " + new Date().toLocaleDateString("pt-BR");
@@ -50,7 +51,12 @@ let html = `
       <div class="suporte">${svg("relogio", 20)}${b.suporte}</div>
       <div class="acerto"><span class="dia"><small>dia</small>10</span><span><b>Acerto mensal</b>${P.acerto}</span></div>
     </div>
-    <div class="preco-base"><span class="incluso">Incluso</span><b>${real(b.preco)}</b><small>por mês</small></div>
+    <div class="preco-base">
+      <span class="oferta">${b.oferta}</span>
+      <s>de ${real(b.precoDe)}/mês</s>
+      <span class="por">por</span>
+      <b>${real(b.preco)}</b><small>por mês</small>
+    </div>
   </div>
 </section>`;
 
@@ -59,8 +65,9 @@ for (const g of GRUPOS) {
   for (const i of g.itens) {
     const sufixo = i.tipo === "qtd" ? ` <small>/ ${i.unidade}${g.mensal ? " /mês" : ""}</small>` : g.mensal ? " <small>/mês</small>" : "";
     html += `
-    <div class="item" data-id="${i.id}" role="button" tabindex="0" aria-pressed="false">
-      <div class="cab"><span class="ico">${svg(i.icone)}</span><h4>${i.nome}</h4>${i.tipo === "qtd" ? "" : '<span class="chave"></span>'}</div>
+    <div class="item${i.obrigatorio ? " obrigatorio" : ""}" data-id="${i.id}" ${i.obrigatorio ? "" : 'role="button" tabindex="0" aria-pressed="false"'}>
+      ${i.obrigatorio ? `<span class="selo-obrig">${svg("cadeado", 13)}Obrigatório para iniciar</span>` : ""}
+      <div class="cab"><span class="ico">${svg(i.icone)}</span><h4>${i.nome}</h4>${i.tipo === "qtd" || i.obrigatorio ? "" : '<span class="chave"></span>'}</div>
       <p>${i.texto}</p>
       <div class="pe"><span class="valor">${real(i.preco)}${sufixo}</span>
         ${i.tipo === "qtd" ? `<span class="qtd"><button data-d="-1" aria-label="Menos">−</button><span>0</span><button data-d="1" aria-label="Mais">+</button></span>` : ""}
@@ -74,6 +81,7 @@ $("#conteudo").innerHTML = html;
 // --- interação ---
 function alternar(id, delta) {
   const i = TODOS[id];
+  if (i.obrigatorio) return; // implantação e treinamento: sempre incluso
   if (i.tipo === "qtd") {
     const q = (escolha[id] || 0) + (delta ?? 1);
     if (q > 0) escolha[id] = q; else delete escolha[id];
@@ -114,7 +122,7 @@ function atualizar() {
   document.querySelectorAll(".item").forEach((card) => {
     const id = card.dataset.id, i = TODOS[id], q = escolha[id] || 0;
     card.classList.toggle("on", q > 0);
-    card.setAttribute("aria-pressed", q > 0);
+    if (!i.obrigatorio) card.setAttribute("aria-pressed", q > 0);
     const n = card.querySelector(".qtd span");
     if (n) n.textContent = q;
     if (!q) return;
