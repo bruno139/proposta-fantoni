@@ -16,3 +16,8 @@ const html = ler("index.html")
 const saida = path.join(__dirname, "Proposta Fantoni PDV.html");
 fs.writeFileSync(saida, html);
 console.log("Gerado: " + saida);
+
+// mesma página em docs/index.html, que é o que o GitHub Pages publica (bruno139.github.io/proposta-fantoni)
+fs.mkdirSync(path.join(__dirname, "docs"), { recursive: true });
+fs.writeFileSync(path.join(__dirname, "docs", "index.html"), html);
+console.log("Gerado: docs/index.html");
