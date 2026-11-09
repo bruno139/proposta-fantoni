@@ -117,6 +117,8 @@ function animarNumero(el, chave, alvo) {
     if (p < 1) requestAnimationFrame(passo);
   };
   requestAnimationFrame(passo);
+  // se a animação não rodar (aba em segundo plano), o valor final aparece mesmo assim
+  setTimeout(() => { if (atual[chave] === alvo) el.textContent = real(alvo); }, 500);
 }
 
 function atualizar() {
