@@ -64,12 +64,18 @@ PROPOSTAS.linkpro = {
     "Este documento detalha o investimento necessário para a implementação e manutenção do sistema Link PRO. " +
     "Os valores de cada item serão confirmados nesta proposta.",
 
+  // telas em 3D no topo da página (prints salvos na pasta public/telas); sem o arquivo, aparece uma janela provisória
+  telas: [
+    { img: "telas/linkpro-1.webp", titulo: "Atendimento" },
+    { img: "telas/linkpro-2.webp", titulo: "Resumo de vendas" },
+    { img: "telas/linkpro-3.webp", titulo: "Frente de caixa" },
+  ],
+
   base: {
     nome: "Link PRO (Base)",
-    regimes: [
-      { id: "mei", nome: "MEI", preco: null },
-      { id: "simples", nome: "Simples Nacional", preco: null },
-    ],
+    // mensalidade única, sem separar por regime (sem "regimes", a página mostra um preço só)
+    preco: null,
+    nota: "Atende praticamente todos os regimes de tributação",
     texto: "Descrição do plano base do Link PRO.",
     suporte: "Horário de suporte a definir.",
     itens: [],

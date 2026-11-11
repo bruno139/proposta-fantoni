@@ -41,13 +41,22 @@ function render(id) {
   TODOS = Object.fromEntries(GRUPOS.flatMap((g) => g.itens.map((i) => [i.id, { ...i, mensal: g.mensal }])));
 
   // o que está escolhido (id -> quantidade): começa com o plano base e os itens obrigatórios
-  regime = b.regimes[0];
+  // sem "regimes" nos dados, o sistema tem mensalidade única
+  regime = b.regimes ? b.regimes[0] : { id: "unico", nome: "", preco: b.preco };
   escolha = Object.fromEntries(Object.values(TODOS).filter((i) => i.obrigatorio).map((i) => [i.id, 1]));
 
   $("#nome-sistema").textContent = P.nome;
   $("#titulo").textContent = P.nome;
   $("#data").textContent = "Valores atualizados em " + new Date().toLocaleDateString("pt-BR");
   $("#intro").textContent = P.intro;
+  // telas em 3D: a primeira fica na frente; se o print não existir, vira uma janela provisória com o nome da tela
+  const telas = P.telas || [];
+  document.querySelector(".hero").classList.toggle("com-telas", telas.length > 0);
+  $("#telas").innerHTML = telas.map((t, n) => `
+    <figure class="tela t${n + 1}">
+      <div class="janela"><i></i><i></i><i></i><span>${t.titulo}</span></div>
+      <img src="${t.img}" alt="" onerror="this.replaceWith(Object.assign(document.createElement('div'), { className: 'vazia', textContent: 'Print da tela: ${t.titulo}' }))">
+    </figure>`).join("");
   $("#rodape").textContent = P.rodape;
   $("#menu-sistemas").innerHTML =
     '<div class="rotulo">Trocar de sistema</div>' +
@@ -68,9 +77,9 @@ function render(id) {
     </div>
     <div class="preco-base">
       <span class="oferta">Para iniciar só com o sistema</span>
-      <div class="regimes" role="radiogroup" aria-label="Regime da empresa">
+      ${b.regimes ? `<div class="regimes" role="radiogroup" aria-label="Regime da empresa">
         ${b.regimes.map((r) => `<button class="regime" role="radio" data-regime="${r.id}"><span>${r.nome}</span><b>${real(r.preco)}</b>${r.preco == null ? "" : "<small>por mês</small>"}</button>`).join("")}
-      </div>
+      </div>` : `<div class="preco-unico"><span>Mensalidade única</span><b>${real(b.preco)}</b>${b.preco == null ? "" : "<small>por mês</small>"}${b.nota ? `<em>${b.nota}</em>` : ""}</div>`}
     </div>
   </div>
 </section>`;
@@ -152,7 +161,7 @@ function animarNumero(el, chave, alvo) {
 function atualizar() {
   document.querySelectorAll(".regime").forEach((el) => el.setAttribute("aria-checked", el.dataset.regime === regime.id));
   let mensal = regime.preco || 0, unico = 0;
-  const linhas = { m: [`<li><span>${b.nome} · ${regime.nome}</span><span>${real(regime.preco)}</span></li>`], u: [] };
+  const linhas = { m: [`<li><span>${b.nome}${regime.nome ? " · " + regime.nome : ""}</span><span>${real(regime.preco)}</span></li>`], u: [] };
   document.querySelectorAll(".item").forEach((card) => {
     const id = card.dataset.id, i = TODOS[id], q = escolha[id] || 0;
     card.classList.toggle("on", q > 0);
