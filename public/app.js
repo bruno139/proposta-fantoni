@@ -19,6 +19,15 @@ const ICONES = {
   ok: '<path d="M20 6 9 17l-5-5"/>',
   cadeado: '<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
   relogio: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  caixa: '<rect x="3" y="10" width="18" height="11" rx="2"/><path d="M7 10V5h10v5M7 14h2M11 14h2M15 14h2M7 17h10"/>',
+  garcom: '<rect x="7" y="2" width="10" height="20" rx="2"/><path d="M10 6h4M10 10h4M10 14h2"/>',
+  globo: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>',
+  qr: '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3M21 14v.01M17 21h4v-4M14 21v-3"/>',
+  lista: '<rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/>',
+  monitor: '<rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8M12 17v4M6 9h6M6 12h4"/>',
+  busca: '<circle cx="11" cy="11" r="7"/><path d="m20 20-4-4M8 9v4M11 9v4M14 9v4"/>',
+  setas: '<path d="M4 7h14l-3-3M20 17H6l3 3"/>',
+  engrenagem: '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/>',
 };
 const svg = (n, t = 22) => `<svg width="${t}" height="${t}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ICONES[n]}</svg>`;
 
@@ -33,7 +42,8 @@ function render(id) {
   document.title = "Proposta " + P.nome;
 
   // Grupos de itens escolhíveis. "mensal" decide em qual total o valor entra.
-  GRUPOS = [
+  // Um sistema pode trazer as próprias seções em "grupos"; senão usa módulos / implantação / extras.
+  GRUPOS = P.grupos || [
     { id: "modulos", titulo: "Módulos adicionais", sub: "Recorrentes, por mês", mensal: true, itens: P.modulos },
     { id: "implantacao", titulo: "Taxas de implantação", sub: "Pagamento único", mensal: false, itens: P.implantacao },
     { id: "extras", titulo: "Serviços extras", sub: "Pagamento único", mensal: false, itens: P.extras },
@@ -60,6 +70,7 @@ function render(id) {
     </div></figure>`).join("");
   girarTelas(true);
   $("#rodape").textContent = P.rodape;
+  $("#acerto-curto").textContent = P.acertoCurto || "Acerto todo dia 10";
   $("#menu-sistemas").innerHTML =
     '<div class="rotulo">Trocar de sistema</div>' +
     Object.entries(PROPOSTAS).map(([k, s]) =>
@@ -75,7 +86,7 @@ function render(id) {
       <p>${b.texto}</p>
       ${b.itens.length ? `<ul>${b.itens.map((i) => `<li>${svg("ok", 18)}${i}</li>`).join("")}</ul>` : ""}
       <div class="suporte">${svg("relogio", 20)}${b.suporte}</div>
-      <div class="acerto"><span class="dia"><small>dia</small>10</span><span><b>Acerto mensal</b>${P.acerto}</span></div>
+      <div class="acerto"><span class="dia"><small>${(P.acertoSelo || ["dia", "10"])[0]}</small>${(P.acertoSelo || ["dia", "10"])[1]}</span><span><b>${P.acertoTitulo || "Acerto mensal"}</b>${P.acerto}</span></div>
     </div>
     <div class="preco-base">
       <span class="oferta">Para iniciar só com o sistema</span>
@@ -87,7 +98,7 @@ function render(id) {
 </section>`;
 
   for (const g of GRUPOS) {
-    html += `<section id="${g.id}"><div class="titulo"><h2>${g.titulo}</h2><span>${g.sub}</span></div>`;
+    html += `<section id="${g.id}"><div class="titulo"><h2>${g.titulo}</h2><span>${g.sub}</span></div>${g.nota ? `<p class="nota-grupo">${g.nota}</p>` : ""}`;
     if (!g.itens.length) {
       html += `<div class="aguardando"><span class="ico">${svg("relogio", 24)}</span><span><b>Itens em definição</b>Os itens e valores desta parte entram aqui em breve.</span></div></section>`;
       continue;
@@ -98,7 +109,7 @@ function render(id) {
       html += `
     <div class="item${i.obrigatorio ? " obrigatorio" : ""}" data-id="${i.id}" ${i.obrigatorio ? "" : 'role="button" tabindex="0" aria-pressed="false"'}>
       ${i.obrigatorio ? `<span class="selo-obrig">${svg("cadeado", 13)}Obrigatório para iniciar</span>` : ""}
-      <div class="cab"><span class="ico">${svg(i.icone)}</span><h4>${i.nome}</h4>${i.tipo === "qtd" || i.obrigatorio ? "" : '<span class="chave"></span>'}</div>
+      <div class="cab"><span class="ico">${svg(i.icone)}</span><h4>${i.nome}${i.requer ? `<span class="tag">exige ${TODOS[i.requer].nome}</span>` : ""}</h4>${i.tipo === "qtd" || i.obrigatorio ? "" : '<span class="chave"></span>'}</div>
       <p>${i.texto}</p>
       <div class="pe"><span class="valor">${real(i.preco)}${sufixo}</span>
         ${i.tipo === "qtd" ? `<span class="qtd"><button data-d="-1" aria-label="Menos">−</button><span>0</span><button data-d="1" aria-label="Mais">+</button></span>` : ""}
@@ -123,10 +134,13 @@ function alternar(id, delta) {
   const i = TODOS[id];
   if (i.obrigatorio) return; // implantação e treinamento: sempre incluso
   if (i.tipo === "qtd") {
-    const q = (escolha[id] || 0) + (delta ?? 1);
+    const q = (escolha[id] || 0) + (delta ?? 1) * (i.passo || 1);
     if (q > 0) escolha[id] = q; else delete escolha[id];
   } else if (escolha[id]) delete escolha[id];
   else escolha[id] = 1;
+  // "exige Cloud": ligar o item liga o que ele exige; desligar o exigido desliga quem depende dele
+  if (escolha[id] && i.requer && !escolha[i.requer]) escolha[i.requer] = 1;
+  if (!escolha[id]) Object.values(TODOS).forEach((o) => { if (o.requer === id) delete escolha[o.id]; });
   atualizar();
 }
 
@@ -173,7 +187,7 @@ function atualizar() {
     if (!q) return;
     const v = i.preco == null ? null : i.preco * q;
     if (i.mensal) mensal += v || 0; else unico += v || 0;
-    const nome = i.tipo === "qtd" ? `${i.nome} (${q} ${i.unidade}${q > 1 ? (i.unidade === "hora" ? "s" : "") : ""})` : i.nome;
+    const nome = i.tipo === "qtd" ? `${i.nome} (${q} ${q > 1 ? i.unidades || i.unidade + "s" : i.unidade})` : i.nome;
     (i.mensal ? linhas.m : linhas.u).push(`<li><span>${nome}</span><span>${real(v)}</span></li>`);
   });
   animarNumero($("#t-mensal"), "mensal", mensal);
