@@ -200,10 +200,13 @@ section:first-child .titulo h2, section:first-child .titulo span { color: #fff; 
   .hero.com-telas .wrap > :not(.telas-3d) { max-width: none; }
   .hero.com-telas .telas-3d { position: relative; top: 0; right: 0; width: 100%; height: clamp(230px, 62vw, 470px); margin-bottom: 10px; order: -1; }
   .hero.com-telas .wrap { display: flex; flex-direction: column; align-items: flex-start; }
-  .tela { width: 74%; }
-  .tela.t3 { right: -4%; }
-  .tela.t2 { top: 9%; right: 7%; }
-  .tela.t1 { top: 19%; right: 18%; }
+  .hero.com-telas { padding-top: 28px; }
+  .hero.com-telas .telas-3d { align-self: stretch; }
+  /* pilha centralizada e menos inclinada: a da frente à esquerda, as de trás aparecendo à direita */
+  .tela { width: 80%; right: auto; }
+  .tela.t3 { top: 0; left: 18%; --giro: rotateY(-12deg) rotateX(5deg) translateZ(-80px); }
+  .tela.t2 { top: 9%; left: 10%; --giro: rotateY(-12deg) rotateX(5deg) translateZ(-35px); }
+  .tela.t1 { top: 19%; left: 2%; --giro: rotateY(-12deg) rotateX(5deg) translateZ(20px); }
   .grade { grid-template-columns: 1fr; }
   .resumo { position: sticky; bottom: 0; z-index: 15; margin: 0 -20px -60px; }
   .caixa { position: static; border-radius: var(--raio) var(--raio) 0 0; padding: 14px 18px; box-shadow: 0 -6px 24px rgba(0,0,0,.12); display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
