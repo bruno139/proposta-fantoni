@@ -5,7 +5,8 @@ const path = require("path");
 
 const pasta = path.join(__dirname, "public");
 const ler = (n) => fs.readFileSync(path.join(pasta, n), "utf8");
-const embutir = (f) => `"data:image/webp;base64,${fs.readFileSync(path.join(pasta, f)).toString("base64")}"`;
+// print que ainda não existe fica como caminho (a página mostra a janela provisória)
+const embutir = (f) => fs.existsSync(path.join(pasta, f)) ? `"data:image/webp;base64,${fs.readFileSync(path.join(pasta, f)).toString("base64")}"` : `"${f}"`;
 const logo = "data:image/webp;base64," + fs.readFileSync(path.join(pasta, "logo.webp")).toString("base64");
 
 const html = ler("index.html")
