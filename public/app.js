@@ -1,9 +1,8 @@
 // Monta a proposta (demonstrativo geral, igual para todos os clientes) a partir de dados.js
 // e calcula o total conforme os itens são ligados/desligados.
-const P = window.PROPOSTA;
+// Há uma proposta por sistema (PDV e Link PRO); o sistema aberto fica no endereço (#pdv ou #linkpro).
 const $ = (s) => document.querySelector(s);
-const real = (v) => "R$ " + v.toLocaleString("pt-BR");
-
+const real = (v) => (v == null ? "A definir" : "R$ " + v.toLocaleString("pt-BR"));
 const ICONES = {
   nota: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h5"/>',
   nuvem: '<path d="M17.5 19a4.5 4.5 0 1 0-1.4-8.8A6 6 0 1 0 6 17.3"/><path d="M6 19h11.5"/>',
@@ -23,49 +22,69 @@ const ICONES = {
 };
 const svg = (n, t = 22) => `<svg width="${t}" height="${t}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ICONES[n]}</svg>`;
 
-// Grupos de itens escolhíveis. "mensal" decide em qual total o valor entra.
-const GRUPOS = [
-  { id: "modulos", titulo: "Módulos adicionais", sub: "Recorrentes, por mês", mensal: true, itens: P.modulos },
-  { id: "implantacao", titulo: "Taxas de implantação", sub: "Pagamento único", mensal: false, itens: P.implantacao },
-  { id: "extras", titulo: "Serviços extras", sub: "Pagamento único", mensal: false, itens: P.extras },
-];
-const TODOS = Object.fromEntries(GRUPOS.flatMap((g) => g.itens.map((i) => [i.id, { ...i, mensal: g.mensal }])));
+// Estado da proposta aberta; render() refaz tudo ao trocar de sistema.
+let sistema, P, b, GRUPOS, TODOS, regime, escolha;
 
-// --- estado: o que está escolhido (id -> quantidade); começa com o plano base e os itens obrigatórios ---
-let regime = P.base.regimes[0];
-const escolha = Object.fromEntries(Object.values(TODOS).filter((i) => i.obrigatorio).map((i) => [i.id, 1]));
+function render(id) {
+  sistema = PROPOSTAS[id] ? id : "pdv";
+  P = PROPOSTAS[sistema];
+  b = P.base;
+  document.documentElement.dataset.sistema = sistema;
+  document.title = "Proposta " + P.nome;
 
-// --- montagem ---
-$("#data").textContent = "Valores atualizados em " + new Date().toLocaleDateString("pt-BR");
-$("#intro").textContent = P.intro;
-$("#rodape").textContent = P.rodape;
+  // Grupos de itens escolhíveis. "mensal" decide em qual total o valor entra.
+  GRUPOS = [
+    { id: "modulos", titulo: "Módulos adicionais", sub: "Recorrentes, por mês", mensal: true, itens: P.modulos },
+    { id: "implantacao", titulo: "Taxas de implantação", sub: "Pagamento único", mensal: false, itens: P.implantacao },
+    { id: "extras", titulo: "Serviços extras", sub: "Pagamento único", mensal: false, itens: P.extras },
+  ];
+  TODOS = Object.fromEntries(GRUPOS.flatMap((g) => g.itens.map((i) => [i.id, { ...i, mensal: g.mensal }])));
 
-const b = P.base;
-let html = `
+  // o que está escolhido (id -> quantidade): começa com o plano base e os itens obrigatórios
+  regime = b.regimes[0];
+  escolha = Object.fromEntries(Object.values(TODOS).filter((i) => i.obrigatorio).map((i) => [i.id, 1]));
+
+  $("#nome-sistema").textContent = P.nome;
+  $("#titulo").textContent = P.nome;
+  $("#data").textContent = "Valores atualizados em " + new Date().toLocaleDateString("pt-BR");
+  $("#intro").textContent = P.intro;
+  $("#rodape").textContent = P.rodape;
+  $("#menu-sistemas").innerHTML =
+    '<div class="rotulo">Trocar de sistema</div>' +
+    Object.entries(PROPOSTAS).map(([k, s]) =>
+      `<a href="#${k}"><span class="bola ${k}">${s.sigla}</span><span><span class="n1">${s.nome}</span><span class="n2">${s.descricao}</span></span>${k === sistema ? '<span class="atual">atual</span>' : ""}</a>`
+    ).join("");
+
+  let html = `
 <section id="base">
   <div class="titulo"><h2>Plano Base</h2><span>Já incluso na proposta</span></div>
   <div class="base">
     <div>
       <h3>${b.nome}</h3>
       <p>${b.texto}</p>
-      <ul>${b.itens.map((i) => `<li>${svg("ok", 18)}${i}</li>`).join("")}</ul>
+      ${b.itens.length ? `<ul>${b.itens.map((i) => `<li>${svg("ok", 18)}${i}</li>`).join("")}</ul>` : ""}
       <div class="suporte">${svg("relogio", 20)}${b.suporte}</div>
       <div class="acerto"><span class="dia"><small>dia</small>10</span><span><b>Acerto mensal</b>${P.acerto}</span></div>
     </div>
     <div class="preco-base">
       <span class="oferta">Para iniciar só com o sistema</span>
       <div class="regimes" role="radiogroup" aria-label="Regime da empresa">
-        ${b.regimes.map((r) => `<button class="regime" role="radio" data-regime="${r.id}"><span>${r.nome}</span><b>${real(r.preco)}</b><small>por mês</small></button>`).join("")}
+        ${b.regimes.map((r) => `<button class="regime" role="radio" data-regime="${r.id}"><span>${r.nome}</span><b>${real(r.preco)}</b>${r.preco == null ? "" : "<small>por mês</small>"}</button>`).join("")}
       </div>
     </div>
   </div>
 </section>`;
 
-for (const g of GRUPOS) {
-  html += `<section id="${g.id}"><div class="titulo"><h2>${g.titulo}</h2><span>${g.sub}</span></div><div class="itens">`;
-  for (const i of g.itens) {
-    const sufixo = i.tipo === "qtd" ? ` <small>/ ${i.unidade}${g.mensal ? " /mês" : ""}</small>` : g.mensal ? " <small>/mês</small>" : "";
-    html += `
+  for (const g of GRUPOS) {
+    html += `<section id="${g.id}"><div class="titulo"><h2>${g.titulo}</h2><span>${g.sub}</span></div>`;
+    if (!g.itens.length) {
+      html += `<div class="aguardando"><span class="ico">${svg("relogio", 24)}</span><span><b>Itens em definição</b>Os itens e valores desta parte entram aqui em breve.</span></div></section>`;
+      continue;
+    }
+    html += `<div class="itens">`;
+    for (const i of g.itens) {
+      const sufixo = i.preco == null ? "" : i.tipo === "qtd" ? ` <small>/ ${i.unidade}${g.mensal ? " /mês" : ""}</small>` : g.mensal ? " <small>/mês</small>" : "";
+      html += `
     <div class="item${i.obrigatorio ? " obrigatorio" : ""}" data-id="${i.id}" ${i.obrigatorio ? "" : 'role="button" tabindex="0" aria-pressed="false"'}>
       ${i.obrigatorio ? `<span class="selo-obrig">${svg("cadeado", 13)}Obrigatório para iniciar</span>` : ""}
       <div class="cab"><span class="ico">${svg(i.icone)}</span><h4>${i.nome}</h4>${i.tipo === "qtd" || i.obrigatorio ? "" : '<span class="chave"></span>'}</div>
@@ -74,10 +93,19 @@ for (const g of GRUPOS) {
         ${i.tipo === "qtd" ? `<span class="qtd"><button data-d="-1" aria-label="Menos">−</button><span>0</span><button data-d="1" aria-label="Mais">+</button></span>` : ""}
       </div>
     </div>`;
+    }
+    html += `</div></section>`;
   }
-  html += `</div></section>`;
+  $("#conteudo").innerHTML = html;
+  atualizar();
+
+  // cards aparecem ao rolar
+  document.querySelectorAll(".titulo, .base, .item, .aguardando").forEach((el, n) => {
+    el.classList.add("surge");
+    el.style.transitionDelay = (n % 2) * 80 + "ms";
+    obs.observe(el);
+  });
 }
-$("#conteudo").innerHTML = html;
 
 // --- interação ---
 function alternar(id, delta) {
@@ -123,7 +151,7 @@ function animarNumero(el, chave, alvo) {
 
 function atualizar() {
   document.querySelectorAll(".regime").forEach((el) => el.setAttribute("aria-checked", el.dataset.regime === regime.id));
-  let mensal = regime.preco, unico = 0;
+  let mensal = regime.preco || 0, unico = 0;
   const linhas = { m: [`<li><span>${b.nome} · ${regime.nome}</span><span>${real(regime.preco)}</span></li>`], u: [] };
   document.querySelectorAll(".item").forEach((card) => {
     const id = card.dataset.id, i = TODOS[id], q = escolha[id] || 0;
@@ -132,8 +160,8 @@ function atualizar() {
     const n = card.querySelector(".qtd span");
     if (n) n.textContent = q;
     if (!q) return;
-    const v = i.preco * q;
-    if (i.mensal) mensal += v; else unico += v;
+    const v = i.preco == null ? null : i.preco * q;
+    if (i.mensal) mensal += v || 0; else unico += v || 0;
     const nome = i.tipo === "qtd" ? `${i.nome} (${q} ${i.unidade}${q > 1 ? (i.unidade === "hora" ? "s" : "") : ""})` : i.nome;
     (i.mensal ? linhas.m : linhas.u).push(`<li><span>${nome}</span><span>${real(v)}</span></li>`);
   });
@@ -144,15 +172,17 @@ function atualizar() {
     '<li class="grupo">Mensal</li>' + linhas.m.join("") +
     (linhas.u.length ? '<li class="grupo">Pagamento único</li>' + linhas.u.join("") : "");
 }
-atualizar();
+// troca de sistema: clique no nome do topo abre o menu; o endereço (#pdv / #linkpro) guarda a escolha
+const botaoSistema = $("#nome-site"), menu = $("#menu-sistemas");
+function abrirMenu(aberto) { menu.classList.toggle("aberto", aberto); botaoSistema.setAttribute("aria-expanded", aberto); }
+botaoSistema.addEventListener("click", (e) => { e.stopPropagation(); abrirMenu(!menu.classList.contains("aberto")); });
+document.addEventListener("click", (e) => { if (!menu.contains(e.target)) abrirMenu(false); });
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") abrirMenu(false); });
+menu.addEventListener("click", () => abrirMenu(false));
+addEventListener("hashchange", () => { render(location.hash.slice(1)); scrollTo({ top: 0 }); });
 
-// cards aparecem ao rolar
 const obs = new IntersectionObserver((es) => es.forEach((e) => e.isIntersecting && (e.target.classList.add("visivel"), obs.unobserve(e.target))), { threshold: 0.1 });
-document.querySelectorAll(".titulo, .base, .item").forEach((el, n) => {
-  el.classList.add("surge");
-  el.style.transitionDelay = (n % 2) * 80 + "ms";
-  obs.observe(el);
-});
+render(location.hash.slice(1));
 
 // tema claro/escuro e impressão
 $("#tema").addEventListener("click", () => {

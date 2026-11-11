@@ -1,6 +1,12 @@
-// Conteúdo da proposta, copiado do PDF "Sistema Fantoni PDV.pdf". Para mudar preço ou texto, edite só aqui.
-window.PROPOSTA = {
-  empresa: "Fantoni Software",
+// Conteúdo das propostas, uma por sistema. Para mudar preço ou texto, edite só aqui.
+// Preço null aparece como "A definir" na página.
+window.PROPOSTAS = {};
+
+// --- Fantoni PDV (copiado do PDF "Sistema Fantoni PDV.pdf") ---
+PROPOSTAS.pdv = {
+  nome: "Fantoni PDV",
+  sigla: "PDV",
+  descricao: "Frente de caixa para bares, restaurantes e varejo",
   slogan: "Excelência em Automação Comercial",
   rodape: "Fantoni Software — Soluções Inteligentes para o Comércio Moderno",
   acerto: "O acerto mensal é realizado todo dia 10 de cada mês.",
@@ -45,4 +51,31 @@ window.PROPOSTA = {
     { id: "treino", nome: "Implantação e Treinamento", preco: 120, obrigatorio: true, icone: "video", texto: "Implantação e Treinamento do Sistema, até 2 horas de configuração e treinamento guiado em ligação via Meet." },
     { id: "horas", nome: "Cadastro de Produtos / Artes / Ajustes Específicos", preco: 30, icone: "pincel", tipo: "qtd", unidade: "hora", texto: "Horas técnicas dedicadas à personalização da base de dados do cliente ou criação de materiais visuais integrados." },
   ],
+};
+
+// --- Link PRO: estrutura pronta, aguardando textos e valores ---
+PROPOSTAS.linkpro = {
+  nome: "Link PRO",
+  sigla: "LP",
+  descricao: "Proposta do sistema Link PRO",
+  rodape: "Fantoni Software — Soluções Inteligentes para o Comércio Moderno",
+  acerto: "O acerto mensal é realizado todo dia 10 de cada mês.",
+  intro:
+    "Este documento detalha o investimento necessário para a implementação e manutenção do sistema Link PRO. " +
+    "Os valores de cada item serão confirmados nesta proposta.",
+
+  base: {
+    nome: "Link PRO (Base)",
+    regimes: [
+      { id: "mei", nome: "MEI", preco: null },
+      { id: "simples", nome: "Simples Nacional", preco: null },
+    ],
+    texto: "Descrição do plano base do Link PRO.",
+    suporte: "Horário de suporte a definir.",
+    itens: [],
+  },
+
+  modulos: [],
+  implantacao: [],
+  extras: [],
 };
