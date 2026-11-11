@@ -17,9 +17,9 @@ PROPOSTAS.pdv = {
 
   // telas em 3D no topo da página (prints salvos na pasta public/telas); sem o arquivo, aparece uma janela provisória
   telas: [
-    { img: "telas/pdv-1.webp", titulo: "Caixa" },
-    { img: "telas/pdv-2.webp", titulo: "Produtos" },
-    { img: "telas/pdv-3.webp", titulo: "Pagamento" },
+    { img: "telas/pdv-1.webp", titulo: "Negociação" },
+    { img: "telas/pdv-2.webp", titulo: "Pagamento" },
+    { img: "telas/pdv-3.webp", titulo: "Evolução de vendas" },
   ],
 
   base: {
