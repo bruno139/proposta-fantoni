@@ -82,7 +82,8 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .hero.com-telas { min-height: 580px; }
 .hero.com-telas .wrap > :not(.telas-3d) { max-width: 47%; position: relative; z-index: 1; }
 .hero.com-telas .telas-3d { display: block; position: absolute; top: -24px; right: -70px; width: 60%; height: 470px; perspective: 1600px; }
-.tela { position: absolute; margin: 0; width: 84%; border-radius: 12px; overflow: hidden; background: #fff; box-shadow: 0 30px 60px rgba(0,0,0,.45), 0 0 0 1px rgba(255,255,255,.08); transform-style: preserve-3d; transition: transform .5s ease; animation: paira 7s ease-in-out infinite alternate; }
+.tela { position: absolute; margin: 0; width: 84%; transform: var(--giro); transition: transform .9s ease, top .9s ease, right .9s ease, left .9s ease, filter .9s ease; }
+.tela .cartao { border-radius: 12px; overflow: hidden; background: #fff; box-shadow: 0 30px 60px rgba(0,0,0,.45), 0 0 0 1px rgba(255,255,255,.08); animation: paira 7s ease-in-out infinite alternate; }
 .tela img, .tela .vazia { display: block; width: 100%; }
 .tela .vazia { aspect-ratio: 16 / 10; }
 .tela .vazia { display: grid; place-items: center; background: linear-gradient(135deg, #f8fafc, #e2e8f0); color: #64748b; font-size: 13px; font-weight: 600; }
@@ -90,10 +91,10 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .janela i { width: 8px; height: 8px; border-radius: 50%; background: #ef4444; }
 .janela i:nth-child(2) { background: #f59e0b; }
 .janela i:nth-child(3) { background: #22c55e; margin-right: 6px; }
-.tela.t3 { top: 0; right: 0; --giro: rotateY(-20deg) rotateX(7deg) translateZ(-120px); transform: var(--giro); z-index: 1; filter: brightness(.7); animation-delay: -4s; }
-.tela.t2 { top: 70px; right: 9%; --giro: rotateY(-20deg) rotateX(7deg) translateZ(-50px); transform: var(--giro); z-index: 2; filter: brightness(.85); animation-delay: -2s; }
-.tela.t1 { top: 145px; right: 18%; --giro: rotateY(-20deg) rotateX(7deg) translateZ(30px); transform: var(--giro); z-index: 3; }
-@keyframes paira { from { transform: var(--giro) translateY(0); } to { transform: var(--giro) translateY(-14px); } }
+.tela.t3 { top: 0; right: 0; --giro: rotateY(-20deg) rotateX(7deg) translateZ(-120px); z-index: 1; filter: brightness(.7); }
+.tela.t2 { top: 70px; right: 9%; --giro: rotateY(-20deg) rotateX(7deg) translateZ(-50px); z-index: 2; filter: brightness(.85); }
+.tela.t1 { top: 145px; right: 18%; --giro: rotateY(-20deg) rotateX(7deg) translateZ(30px); z-index: 3; }
+@keyframes paira { to { transform: translateY(-14px); } }
 .telas-3d:hover .tela.t3 { transform: rotateY(-12deg) rotateX(5deg) translateZ(-120px) translateX(30px); }
 .telas-3d:hover .tela.t1 { transform: rotateY(-12deg) rotateX(5deg) translateZ(30px) translateX(-30px); }
 .cta { display: inline-flex; align-items: center; gap: 6px; margin-top: 26px; background: var(--botao); color: #fff; box-shadow: 0 8px 24px var(--botao-sombra); text-decoration: none; font-weight: 600; padding: 11px 20px; border-radius: 12px; transition: transform .15s; }

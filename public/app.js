@@ -49,14 +49,16 @@ function render(id) {
   $("#titulo").textContent = P.nome;
   $("#data").textContent = "Valores atualizados em " + new Date().toLocaleDateString("pt-BR");
   $("#intro").textContent = P.intro;
-  // telas em 3D: a primeira fica na frente; se o print não existir, vira uma janela provisória com o nome da tela
+  // telas em 3D: a primeira começa na frente e a cada 7 s a da frente vai para trás;
+  // se o print não existir, vira uma janela provisória com o nome da tela
   const telas = P.telas || [];
   document.querySelector(".hero").classList.toggle("com-telas", telas.length > 0);
-  $("#telas").innerHTML = telas.map((t, n) => `
-    <figure class="tela t${n + 1}">
+  $("#telas").innerHTML = telas.map((t) => `
+    <figure class="tela"><div class="cartao">
       <div class="janela"><i></i><i></i><i></i><span>${t.titulo}</span></div>
       <img src="${t.img}" alt="" onerror="this.replaceWith(Object.assign(document.createElement('div'), { className: 'vazia', textContent: 'Print da tela: ${t.titulo}' }))">
-    </figure>`).join("");
+    </div></figure>`).join("");
+  girarTelas(true);
   $("#rodape").textContent = P.rodape;
   $("#menu-sistemas").innerHTML =
     '<div class="rotulo">Trocar de sistema</div>' +
@@ -189,6 +191,15 @@ document.addEventListener("click", (e) => { if (!menu.contains(e.target)) abrirM
 document.addEventListener("keydown", (e) => { if (e.key === "Escape") abrirMenu(false); });
 menu.addEventListener("click", () => abrirMenu(false));
 addEventListener("hashchange", () => { render(location.hash.slice(1)); scrollTo({ top: 0 }); });
+
+// posição de cada tela na pilha (t1 = frente); "volta" conta quantas vezes já girou
+let volta = 0, relogioTelas;
+function girarTelas(reiniciar) {
+  const figs = [...document.querySelectorAll("#telas .tela")];
+  if (reiniciar) { volta = 0; clearInterval(relogioTelas); if (figs.length > 1) relogioTelas = setInterval(() => girarTelas(), 7000); }
+  else volta++;
+  figs.forEach((f, n) => (f.className = "tela t" + (((n - volta) % figs.length + figs.length) % figs.length + 1)));
+}
 
 const obs = new IntersectionObserver((es) => es.forEach((e) => e.isIntersecting && (e.target.classList.add("visivel"), obs.unobserve(e.target))), { threshold: 0.1 });
 render(location.hash.slice(1));
