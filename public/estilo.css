@@ -79,10 +79,10 @@ button { font: inherit; color: inherit; cursor: pointer; }
 
 /* telas do sistema em 3D, à direita da abertura */
 .telas-3d { display: none; }
-.hero.com-telas { min-height: 520px; }
-.hero.com-telas .wrap > :not(.telas-3d) { max-width: 52%; position: relative; z-index: 1; }
-.hero.com-telas .telas-3d { display: block; position: absolute; top: -20px; right: -10px; width: 46%; height: 340px; perspective: 1400px; }
-.tela { position: absolute; margin: 0; width: 78%; border-radius: 12px; overflow: hidden; background: #fff; box-shadow: 0 30px 60px rgba(0,0,0,.45), 0 0 0 1px rgba(255,255,255,.08); transform-style: preserve-3d; transition: transform .5s ease; animation: paira 7s ease-in-out infinite alternate; }
+.hero.com-telas { min-height: 580px; }
+.hero.com-telas .wrap > :not(.telas-3d) { max-width: 47%; position: relative; z-index: 1; }
+.hero.com-telas .telas-3d { display: block; position: absolute; top: -24px; right: -70px; width: 60%; height: 470px; perspective: 1600px; }
+.tela { position: absolute; margin: 0; width: 84%; border-radius: 12px; overflow: hidden; background: #fff; box-shadow: 0 30px 60px rgba(0,0,0,.45), 0 0 0 1px rgba(255,255,255,.08); transform-style: preserve-3d; transition: transform .5s ease; animation: paira 7s ease-in-out infinite alternate; }
 .tela img, .tela .vazia { display: block; width: 100%; }
 .tela .vazia { aspect-ratio: 16 / 10; }
 .tela .vazia { display: grid; place-items: center; background: linear-gradient(135deg, #f8fafc, #e2e8f0); color: #64748b; font-size: 13px; font-weight: 600; }
@@ -90,12 +90,12 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .janela i { width: 8px; height: 8px; border-radius: 50%; background: #ef4444; }
 .janela i:nth-child(2) { background: #f59e0b; }
 .janela i:nth-child(3) { background: #22c55e; margin-right: 6px; }
-.tela.t3 { top: 0; right: 0; --giro: rotateY(-24deg) rotateX(8deg) translateZ(-140px); transform: var(--giro); z-index: 1; filter: brightness(.7); animation-delay: -4s; }
-.tela.t2 { top: 50px; right: 12%; --giro: rotateY(-24deg) rotateX(8deg) translateZ(-60px); transform: var(--giro); z-index: 2; filter: brightness(.85); animation-delay: -2s; }
-.tela.t1 { top: 110px; right: 24%; --giro: rotateY(-24deg) rotateX(8deg) translateZ(30px); transform: var(--giro); z-index: 3; }
+.tela.t3 { top: 0; right: 0; --giro: rotateY(-20deg) rotateX(7deg) translateZ(-120px); transform: var(--giro); z-index: 1; filter: brightness(.7); animation-delay: -4s; }
+.tela.t2 { top: 70px; right: 9%; --giro: rotateY(-20deg) rotateX(7deg) translateZ(-50px); transform: var(--giro); z-index: 2; filter: brightness(.85); animation-delay: -2s; }
+.tela.t1 { top: 145px; right: 18%; --giro: rotateY(-20deg) rotateX(7deg) translateZ(30px); transform: var(--giro); z-index: 3; }
 @keyframes paira { from { transform: var(--giro) translateY(0); } to { transform: var(--giro) translateY(-14px); } }
-.telas-3d:hover .tela.t3 { transform: rotateY(-14deg) rotateX(6deg) translateZ(-140px) translateX(30px); }
-.telas-3d:hover .tela.t1 { transform: rotateY(-14deg) rotateX(6deg) translateZ(30px) translateX(-30px); }
+.telas-3d:hover .tela.t3 { transform: rotateY(-12deg) rotateX(5deg) translateZ(-120px) translateX(30px); }
+.telas-3d:hover .tela.t1 { transform: rotateY(-12deg) rotateX(5deg) translateZ(30px) translateX(-30px); }
 .cta { display: inline-flex; align-items: center; gap: 6px; margin-top: 26px; background: var(--botao); color: #fff; box-shadow: 0 8px 24px var(--botao-sombra); text-decoration: none; font-weight: 600; padding: 11px 20px; border-radius: 12px; transition: transform .15s; }
 .cta:hover { transform: translateY(-2px); }
 
@@ -198,11 +198,12 @@ section:first-child .titulo h2, section:first-child .titulo span { color: #fff; 
 @media (max-width: 900px) {
   .hero.com-telas { min-height: 0; }
   .hero.com-telas .wrap > :not(.telas-3d) { max-width: none; }
-  .hero.com-telas .telas-3d { position: relative; top: 0; right: 0; width: 100%; height: clamp(190px, 46vw, 330px); margin-bottom: 10px; order: -1; }
+  .hero.com-telas .telas-3d { position: relative; top: 0; right: 0; width: 100%; height: clamp(230px, 62vw, 470px); margin-bottom: 10px; order: -1; }
   .hero.com-telas .wrap { display: flex; flex-direction: column; align-items: flex-start; }
-  .tela { width: 50%; }
-  .tela.t2 { top: 30px; }
-  .tela.t1 { top: 60px; }
+  .tela { width: 74%; }
+  .tela.t3 { right: -4%; }
+  .tela.t2 { top: 9%; right: 7%; }
+  .tela.t1 { top: 19%; right: 18%; }
   .grade { grid-template-columns: 1fr; }
   .resumo { position: sticky; bottom: 0; z-index: 15; margin: 0 -20px -60px; }
   .caixa { position: static; border-radius: var(--raio) var(--raio) 0 0; padding: 14px 18px; box-shadow: 0 -6px 24px rgba(0,0,0,.12); display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
