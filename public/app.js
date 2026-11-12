@@ -56,7 +56,8 @@ function render(id) {
   escolha = Object.fromEntries(Object.values(TODOS).filter((i) => i.obrigatorio).map((i) => [i.id, 1]));
 
   $("#nome-sistema").textContent = P.nome;
-  $("#titulo").textContent = P.nome;
+  // última palavra do nome em verde-água, como pede o design system ("Fantoni PDV", "Link PRO")
+  $("#titulo").innerHTML = P.nome.replace(/(\S+)$/, "<em>$1</em>");
   $("#data").textContent = "Valores atualizados em " + new Date().toLocaleDateString("pt-BR");
   $("#intro").textContent = P.intro;
   // telas em 3D: a primeira começa na frente e a cada 7 s a da frente vai para trás;

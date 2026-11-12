@@ -7,13 +7,14 @@ const pasta = path.join(__dirname, "public");
 const ler = (n) => fs.readFileSync(path.join(pasta, n), "utf8");
 // print que ainda não existe fica como caminho (a página mostra a janela provisória)
 const embutir = (f) => fs.existsSync(path.join(pasta, f)) ? `"data:image/webp;base64,${fs.readFileSync(path.join(pasta, f)).toString("base64")}"` : `"${f}"`;
-const logo = "data:image/webp;base64," + fs.readFileSync(path.join(pasta, "logo.webp")).toString("base64");
+const svg = (n) => "data:image/svg+xml;base64," + fs.readFileSync(path.join(pasta, n)).toString("base64");
 
 const html = ler("index.html")
   .replace('<link rel="stylesheet" href="estilo.css">', () => "<style>\n" + ler("estilo.css") + "</style>")
   .replace('<script src="dados.js"></script>', () => "<script>\n" + ler("dados.js").replace(/"(telas\/[^"]+\.webp)"/g, (_, f) => embutir(f)) + "</script>")
   .replace('<script src="app.js"></script>', () => "<script>\n" + ler("app.js") + "</script>")
-  .replace('src="logo.webp"', () => `src="${logo}"`);
+  .replace('src="logo-fantoni.svg"', () => `src="${svg("logo-fantoni.svg")}"`)
+  .replace('href="favicon.svg"', () => `href="${svg("favicon.svg")}"`);
 
 const saida = path.join(__dirname, "Proposta Fantoni PDV.html");
 fs.writeFileSync(saida, html);
